@@ -5,6 +5,7 @@ from MWinAlgo import MWinAlgo
 from MLinAlgo import MLinAlgo
 from sys import platform
 
+
 class Mdrower:
     def __init__(self):
         if platform == "win32":
@@ -31,7 +32,8 @@ class Mdrower:
     def start(self):
         self.button_start.destroy()
         refresh_time = self.refresh_input.get()
-        self.algoM.start(refresh_time)
+        thread = threading.Thread(target=self.algoM.start, args= (refresh_time,))
+        thread.start()
         self.refresh_input.destroy()
         self.button_stop = Button(self.window, text="stop", command=self.stop)
         self.button_stop.grid(row=1, column=0, sticky=W)
@@ -44,7 +46,7 @@ class Mdrower:
         self.button_start.grid(row=1, column=0, sticky=W)
 
         self.refresh_input = Entry(self.window, background="gray", fg="black")
-        self.refresh_input.insert(0, "hh:mm:ss")
+        self.refresh_input.insert(0, "00:00:02")
         self.refresh_input.grid(row=1, column=1, sticky=W)
 
     def comper(self):
@@ -72,7 +74,7 @@ class Mdrower:
         self.button_start.grid(row=1, column=0, sticky=W)
 
         self.refresh_input = Entry(self.window, background="gray", fg="black")
-        self.refresh_input.insert(0, "hh:mm:ss")
+        self.refresh_input.insert(0, "00:00:02")
         self.refresh_input.grid(row=1, column=1, sticky=W)
 
         self.frame = Frame(self.window)
