@@ -3,7 +3,7 @@ class MWinAlgo:
     def __init__(self, mdrow):
         self.my_drow = mdrow
 
-    def start(self):
+    def start(self, refresh_time):
         self.my_drow.write("the program start to work")
 
     def stop(self):

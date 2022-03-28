@@ -14,7 +14,8 @@ class Mdrower:
             print('lin')
             self.algoM = MLinAlgo(self)
         self.window = None
-        self.button_start =None
+        self.button_start = None
+        self.refresh_input = None
         self.button_stop =None
         self.button_comper =None
         self.from_comper_label = None
@@ -29,15 +30,22 @@ class Mdrower:
 
     def start(self):
         self.button_start.destroy()
-        self.algoM.start()
+        refresh_time = self.refresh_input.get()
+        self.algoM.start(refresh_time)
+        self.refresh_input.destroy()
         self.button_stop = Button(self.window, text="stop", command=self.stop)
         self.button_stop.grid(row=1, column=0, sticky=W)
 
     def stop(self):
         self.button_stop.destroy()
         self.algoM.stop()
+
         self.button_start = Button(self.window, text="start", command=self.start)
         self.button_start.grid(row=1, column=0, sticky=W)
+
+        self.refresh_input = Entry(self.window, background="gray", fg="black")
+        self.refresh_input.insert(0, "hh:mm:ss")
+        self.refresh_input.grid(row=1, column=1, sticky=W)
 
     def comper(self):
         fdate = self.from_comper_input['date'].get()
@@ -63,6 +71,10 @@ class Mdrower:
         self.button_start = Button(self.window, text="start", command=self.start)
         self.button_start.grid(row=1, column=0, sticky=W)
 
+        self.refresh_input = Entry(self.window, background="gray", fg="black")
+        self.refresh_input.insert(0, "hh:mm:ss")
+        self.refresh_input.grid(row=1, column=1, sticky=W)
+
         self.frame = Frame(self.window)
         self.output = Text(self.frame, wrap=WORD, background="gray")
         self.output.pack(expand=True, side=LEFT)
@@ -78,13 +90,13 @@ class Mdrower:
         lable_fdate = Label(self.window, text="date:", fg="black", font="none 12 bold")
         lable_fdate .grid(row=3, column=0, sticky=W)
         self.from_comper_input['date']= Entry(self.window,background="gray",fg="black")
-        self.from_comper_input['date'].insert(0,"XX:XX:XXXX")
+        self.from_comper_input['date'].insert(0,"dd:mm:yyyy")
         self.from_comper_input['date'].grid(row=3, column=1, sticky=W)
 
         lable_ftime = Label(self.window, text="time:", fg="black", font="none 12 bold")
         lable_ftime .grid(row=3, column=2, sticky=W)
         self.from_comper_input['time'] = Entry(self.window, background="gray", fg="black")
-        self.from_comper_input['time'].insert(0, "XX:XX:XX")
+        self.from_comper_input['time'].insert(0, "hh:mm:ss")
         self.from_comper_input['time'].grid(row=3, column=3, sticky=W)
 
         self.to_comper_label = Label(self.window, text="to :", fg="black", font="none 12 bold")
@@ -93,13 +105,13 @@ class Mdrower:
         lable_tdate = Label(self.window, text="date:", fg="black", font="none 12 bold")
         lable_tdate.grid(row=5, column=0, sticky=W)
         self.to_comper_input['date']= Entry(self.window,background="gray",fg="black")
-        self.to_comper_input['date'].insert(0,"XX:XX:XXXX")
+        self.to_comper_input['date'].insert(0,"dd:mm:yyyy")
         self.to_comper_input['date'].grid(row=5, column=1, sticky=W)
 
         lable_ftime = Label(self.window, text="time:", fg="black", font="none 12 bold")
         lable_ftime .grid(row=5, column=2, sticky=W)
         self.to_comper_input['time'] = Entry(self.window, background="gray", fg="black")
-        self.to_comper_input['time'].insert(0, "XX:XX:XX")
+        self.to_comper_input['time'].insert(0, "hh:mm:ss")
         self.to_comper_input['time'].grid(row=5, column=3, sticky=W)
 
         self.button_comper = Button(self.window, text="comper", command=self.comper)
