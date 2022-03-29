@@ -11,16 +11,16 @@
 #     # Displaying the P_ID and P_Name of the process
 #     print(f"{process.ProcessId} {process.Name}")
 
-# import zlib
-# d={'key3':'value4', 'key1':'value1'}
-# checksum=0
-# for item in d.items():
-#     c1 = 1
-#     for t in item:
-#         c1 = zlib.adler32(bytes(repr(t),'utf-8'), c1)
-#     checksum=checksum ^ c1
-#
-# print(checksum)
+import zlib
+d={'24788': 'audiodg.exe'}
+checksum=0
+for item in d.items():
+    c1 = 1
+    for t in item:
+        c1 = zlib.adler32(bytes(repr(t),'utf-8'), c1)
+    checksum=checksum ^ c1
+
+print(checksum)
 # jhjh={'key3':'value4', 'key1':'value1'}
 # checksum=0
 # for item in d.items():
@@ -65,8 +65,24 @@
 #
 # print("decrypted string: ", decMessage)
 
-import csv
-with open("serviceList.csv", 'r') as file:
-    reader = csv.reader(file)
-    for line in reader:
-        print(line[0] + "," + line[1])
+# import csv
+# with open("serviceList.csv", 'r') as file:
+#     reader = csv.reader(file)
+#     for line in reader:
+#         print(line[0] + "," + line[1])
+
+# f = open("status_log.txt", "r")
+# lines = f.readlines()
+# for line in lines:
+#     print(line)
+#     # print(line.strip())
+#     # print(line.strip().split(' - '))
+#     print(line.split()[0])
+#     # print(type( line.strip()))
+
+# dict_wed = {'24788': 'audiodg.exe'}
+
+
+
+
+

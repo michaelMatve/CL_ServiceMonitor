@@ -21,7 +21,7 @@ class MLinAlgo:
             self.compare_services() # compare between services - prints to user, and write in status_log
             self.write_to_servicelist() # write into serviceList the last sample of services according to date and checksum
             time.sleep(new_time)
-            
+
     def load_to_list(self):
         f = open("serviceList.csv", 'a')
         f.close()
@@ -59,6 +59,35 @@ class MLinAlgo:
                     self.my_drow.stop()
                     return
             self.mon_run = True
+
+    def check_hacked(self):
+        f = open("status_log.txt", 'a')
+        f.close()
+
+        check_dict = {}
+
+        f = open("status_log.txt", 'r')
+        lines = f.readlines()
+        for line in lines:
+            if line.split()[0] == "date:":
+                pass
+            elif line.split()[0] == "new" or line.split()[0] == "services":
+                pass
+            elif line.split()[0] == "checksum:":
+                checksum = str(line.split()[1])
+                comp_checksum = self.check_sum(check_dict)
+                if checksum != str(comp_checksum):
+                    print(check_dict)
+                    self.my_drow.write("someone changed the status_log !!!!!")
+                    self.my_drow.write(checksum)
+                    self.my_drow.write(str(comp_checksum))
+                    check_dict = {}
+            else:
+                pid = line.split(' - ')[0]
+                self.my_drow.write(f"pid is {str(pid)}")
+                pname = line.split(' - ')[1][:-1]
+                self.my_drow.write(f"pname is {str(pname)}")
+                check_dict[str(pid)] = str(pname)
             
     def check_sum(self, dict_to_encrypt):
         checksum = 0
@@ -74,6 +103,7 @@ class MLinAlgo:
         curr_time = datetime.now()
         curr_service = {}
         change = False
+        for_checksum = {}
 
         if not self.services_list:
             f2 = open("status_log.txt", "a")
@@ -81,23 +111,24 @@ class MLinAlgo:
             self.my_drow.write("new services:")
             f2.write("new services:\n")
             for proc in psutil.process_iter():
-                curr_service[proc.pid] = proc.name()
+                curr_service[proc.pid] = str(proc.name())
                 self.my_drow.write(f"{proc.pid} {proc.name()}")
                 f2.write(f"{proc.pid} - {proc.name()}\n")
+                for_checksum[proc.pid] = str(proc.name())
             self.services_list.append((curr_time, curr_service))
-            checksum = self.check_sum(self.services_list[-1][1])
+            checksum = self.check_sum(for_checksum)
             f2.write(f"checksum: {checksum}\n")
             f2.close()
 
         else:
             last_service = self.services_list[-1][1]
             for proc in psutil.process_iter():
-                curr_service[proc.pid] = proc.name()
-                if proc.pid not in last_service or proc.name() not in last_service.values():
+                curr_service[proc.pid] = str(proc.name())
+                if proc.name() not in last_service.values():
                     change = True
 
             for curr_pid in curr_service.keys():
-                if curr_pid not in last_service or curr_service[curr_pid] not in last_service.values():
+                if curr_service[curr_pid] not in last_service.values():
                     change = True
 
             if not change:
@@ -108,17 +139,19 @@ class MLinAlgo:
                 f2.write(f"date: {curr_time}\n")
                 f2.write("new services:\n")
                 for curr_pid in curr_service.keys():
-                    if curr_pid not in last_service or curr_service[curr_pid] not in last_service.values():
+                    if curr_service[curr_pid] not in last_service.values():
                         self.my_drow.write(f"{curr_pid} - {curr_service[curr_pid]}")
                         f2.write(f"{curr_pid} - {curr_service[curr_pid]}\n")
+                        for_checksum[curr_pid] = str(curr_service[curr_pid])
 
                 self.my_drow.write("services no longer run:")
                 f2.write("services no longer run:\n")
                 for last_pid in last_service.keys():
-                    if last_pid not in curr_service or last_service[last_pid] not in curr_service.values():
+                    if last_service[last_pid] not in curr_service.values():
                         self.my_drow.write(f"{last_pid} - {last_service[last_pid]}")
                         f2.write(f"{last_pid} - {last_service[last_pid]}\n")
-                checksum = self.check_sum(curr_service)
+                        for_checksum[last_pid] = str(last_service[last_pid])
+                checksum = self.check_sum(for_checksum)
                 f2.write(f"checksum: {checksum}\n")
                 f2.close()
             self.services_list.append((curr_time, curr_service))
