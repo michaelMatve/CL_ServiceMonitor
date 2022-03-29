@@ -52,14 +52,14 @@ class Mdrower:
     def comper(self):
         fdate = self.from_comper_input['date'].get()
         self.from_comper_input['date'].delete(0, END)
-        self.from_comper_input['date'].insert(0,"XX:XX:XXXX")
+        self.from_comper_input['date'].insert(0,"XXXX-XX-XX")
         ftime = self.from_comper_input['time'].get()
         self.from_comper_input['time'].delete(0, END)
         self.from_comper_input['time'].insert(0,"XX:XX:XX")
 
         tdate = self.to_comper_input['date'].get()
         self.to_comper_input['date'].delete(0, END)
-        self.to_comper_input['date'].insert(0,"XX:XX:XXXX")
+        self.to_comper_input['date'].insert(0,"XXXX-XX-XX")
         ttime = self.to_comper_input['time'].get()
         self.to_comper_input['time'].delete(0, END)
         self.to_comper_input['time'].insert(0,"XX:XX:XX")
@@ -92,7 +92,7 @@ class Mdrower:
         lable_fdate = Label(self.window, text="date:", fg="black", font="none 12 bold")
         lable_fdate .grid(row=3, column=0, sticky=W)
         self.from_comper_input['date']= Entry(self.window,background="gray",fg="black")
-        self.from_comper_input['date'].insert(0,"dd:mm:yyyy")
+        self.from_comper_input['date'].insert(0,"yyyy-mm-dd")
         self.from_comper_input['date'].grid(row=3, column=1, sticky=W)
 
         lable_ftime = Label(self.window, text="time:", fg="black", font="none 12 bold")
@@ -107,7 +107,7 @@ class Mdrower:
         lable_tdate = Label(self.window, text="date:", fg="black", font="none 12 bold")
         lable_tdate.grid(row=5, column=0, sticky=W)
         self.to_comper_input['date']= Entry(self.window,background="gray",fg="black")
-        self.to_comper_input['date'].insert(0,"dd:mm:yyyy")
+        self.to_comper_input['date'].insert(0,"yyyy-mm-dd")
         self.to_comper_input['date'].grid(row=5, column=1, sticky=W)
 
         lable_ftime = Label(self.window, text="time:", fg="black", font="none 12 bold")

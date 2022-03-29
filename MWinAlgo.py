@@ -133,6 +133,7 @@ class MWinAlgo:
                 checksum = self.check_sum(curr_service)
                 f2.write(f"checksum: {checksum}\n")
                 f2.close()
+            self.services_list.append((curr_time, curr_service))
 
 
     def write_to_servicelist(self):
@@ -179,5 +180,55 @@ class MWinAlgo:
 
         self.mon_run = False
 
+
+
     def comper(self, fdate, ftime , tdate, ttime):
-        self.my_drow.write(f"{fdate} {ftime} comper to {tdate} {ttime}")
+        self.load_to_list()
+        stringf = f"{fdate} {ftime}"
+        stringt = f"{tdate} {ttime}"
+        fdate_object = datetime.fromisoformat(stringf)
+        tdate_object = datetime.fromisoformat(stringt)
+        closest_to_f = self.find_nearest_date(fdate_object)
+        closest_to_t = self.find_nearest_date(tdate_object)
+
+
+        if closest_to_t.timestamp() - closest_to_f.timestamp() > 0:
+            recent = closest_to_t
+            older = closest_to_f
+        else:
+            older = closest_to_t
+            recent = closest_to_f
+
+        self.my_drow.write(f"{recent}")
+        self.my_drow.write(f"{older}")
+
+        recent_proc = {}
+        older_proc = {}
+        for tup in self.services_list:
+            if str(tup[0]) == str(recent):
+                recent_proc = tup[1]
+            if str(tup[0]) == str(older):
+                older_proc = tup[1]
+
+        self.my_drow.write("new services:")
+        for pid in recent_proc:
+            if pid not in older_proc or recent_proc[pid] not in older_proc.values():
+                self.my_drow.write(f"{pid} - {recent_proc[pid]}")
+        self.my_drow.write("old services:")
+        for pid in older_proc:
+            if pid not in recent_proc or older_proc[pid] not in recent_proc.values():
+                self.my_drow.write(f"{pid} - {older_proc[pid]}")
+
+
+
+    def find_nearest_date(self, check_date):
+        date_list = []
+        for i in range(0, len(self.services_list)):
+            date_list.append(datetime.fromisoformat(str(self.services_list[i][0])))
+
+        diff_date = {}
+        # for date in date_list:
+        #     diff_date[abs(check_date.timestamp() - date.timestamp())] = date
+        diff_date = {abs(check_date.timestamp()-date.timestamp()):date for date in date_list}
+        return diff_date[min(diff_date.keys())]
+
