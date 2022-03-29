@@ -17,6 +17,7 @@ class MLinAlgo:
         new_time = refresh_time.split(":")
         new_time = ((int(new_time[0]) * 60) + int(new_time[1]))*60 + int(new_time[2])
         self.load_to_list()
+        self.check_hacked()
         while(self.mon_run):
             self.compare_services() # compare between services - prints to user, and write in status_log
             self.write_to_servicelist() # write into serviceList the last sample of services according to date and checksum
@@ -114,7 +115,7 @@ class MLinAlgo:
                 curr_service[proc.pid] = str(proc.name())
                 self.my_drow.write(f"{proc.pid} {proc.name()}")
                 f2.write(f"{proc.pid} - {proc.name()}\n")
-                for_checksum[proc.pid] = str(proc.name())
+                for_checksum[str(proc.pid)] = str(proc.name())
             self.services_list.append((curr_time, curr_service))
             checksum = self.check_sum(for_checksum)
             f2.write(f"checksum: {checksum}\n")
@@ -142,7 +143,7 @@ class MLinAlgo:
                     if curr_service[curr_pid] not in last_service.values():
                         self.my_drow.write(f"{curr_pid} - {curr_service[curr_pid]}")
                         f2.write(f"{curr_pid} - {curr_service[curr_pid]}\n")
-                        for_checksum[curr_pid] = str(curr_service[curr_pid])
+                        for_checksum[str(curr_pid)] = str(curr_service[curr_pid])
 
                 self.my_drow.write("services no longer run:")
                 f2.write("services no longer run:\n")
@@ -150,7 +151,7 @@ class MLinAlgo:
                     if last_service[last_pid] not in curr_service.values():
                         self.my_drow.write(f"{last_pid} - {last_service[last_pid]}")
                         f2.write(f"{last_pid} - {last_service[last_pid]}\n")
-                        for_checksum[last_pid] = str(last_service[last_pid])
+                        for_checksum[str(last_pid)] = str(last_service[last_pid])
                 checksum = self.check_sum(for_checksum)
                 f2.write(f"checksum: {checksum}\n")
                 f2.close()
