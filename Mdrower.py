@@ -1,9 +1,12 @@
 from tkinter import *
 from tkinter.ttk import Progressbar
 import threading
-from MWinAlgo import MWinAlgo
-from MLinAlgo import MLinAlgo
 from sys import platform
+if platform == "win32":
+    from MWinAlgo import MWinAlgo
+else:
+    from MLinAlgo import MLinAlgo
+
 
 
 class Mdrower:
