@@ -48,10 +48,6 @@ class MWinAlgo:
                 elif line == ['date', 'checksum']:
                     if checksum != None:
                         if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                            # print(checksum)
-                            # print(self.check_sum(self.services_list[-1][1]))
-                            for process in self.services_list[-1][1].keys():
-                                print(f"{process},{self.services_list[-1][1][process]}")
                             self.my_drow.write("someone change yuour files1111111 !!!!!!!!!!!!!!!!!!!!!!!!")
                             self.my_drow.stop()
                             return
@@ -86,19 +82,14 @@ class MWinAlgo:
                 checksum = str(line.split()[1])
                 comp_checksum = self.check_sum(check_dict)
                 if checksum != str(comp_checksum):
-                    print(check_dict)
                     self.my_drow.write("someone changed the status_log !!!!!")
                     self.my_drow.stop()
-                    self.my_drow.write(checksum)
-                    self.my_drow.write(str(comp_checksum))
                     return
                 else:
                     check_dict = {}
             else:
                 pid = line.split(' - ')[0]
-                self.my_drow.write(f"pid is {str(pid)}")
                 pname = line.split(' - ')[1][:-1]
-                self.my_drow.write(f"pname is {str(pname)}")
                 check_dict[str(pid)] = str(pname)
 
         os.system("attrib +h " + "status_log.txt")
@@ -150,7 +141,7 @@ class MWinAlgo:
                     change = True
 
             if not change:
-                self.my_drow.write("nothing has changed!:")
+                self.my_drow.write("nothing has changed!")
             else:
                 f2 = open("status_log.txt", "a")
                 self.my_drow.write("new services:")
@@ -225,27 +216,6 @@ class MWinAlgo:
 
     def comper(self, fdate, ftime , tdate, ttime):
         self.load_to_list()
-        if not self.services_list:
-            curr_service = {}
-            curr_time = datetime.now()
-            for_checksum = {}
-            pythoncom.CoInitialize()
-            f = wmi.WMI()
-            f2 = open("status_log.txt", "a")
-            f2.write(f"date: {curr_time}\n")
-            self.my_drow.write("new services:")
-            f2.write("new services:\n")
-            for process in f.Win32_Process():
-                curr_service[process.ProcessId] = str(process.Name)
-                self.my_drow.write(f"{process.ProcessId} {process.Name}")
-                f2.write(f"{process.ProcessId} - {process.Name}\n")
-                for_checksum[str(process.ProcessId)] = str(process.Name)
-            self.services_list.append((curr_time, curr_service))
-            checksum = self.check_sum(for_checksum)
-            f2.write(f"checksum: {checksum}\n")
-            f2.close()
-            os.system("attrib +h " + "status_log.txt")
-
         stringf = f"{fdate} {ftime}"
         stringt = f"{tdate} {ttime}"
         fdate_object = datetime.fromisoformat(stringf)
@@ -260,9 +230,6 @@ class MWinAlgo:
         else:
             older = closest_to_t
             recent = closest_to_f
-
-        self.my_drow.write(f"{recent}")
-        self.my_drow.write(f"{older}")
 
         recent_proc = {}
         older_proc = {}
