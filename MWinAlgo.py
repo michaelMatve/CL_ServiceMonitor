@@ -88,8 +88,11 @@ class MWinAlgo:
                 if checksum != str(comp_checksum):
                     print(check_dict)
                     self.my_drow.write("someone changed the status_log !!!!!")
+                    self.my_drow.stop()
                     self.my_drow.write(checksum)
                     self.my_drow.write(str(comp_checksum))
+                    return
+                else:
                     check_dict = {}
             else:
                 pid = line.split(' - ')[0]

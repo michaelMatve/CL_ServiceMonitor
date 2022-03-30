@@ -86,11 +86,16 @@ class MLinAlgo:
                 comp_checksum2 = self.check_sum(check_dict_old)
                 total_checksum = comp_checksum1 + comp_checksum2
                 if checksum != str(total_checksum):
-                    print(f"\n{check_dict_new}")
-                    print(f"\n{check_dict_new}")
+                    print(f"{checksum}")
+                    print(f"{total_checksum}")
+                    # print(f"\n{check_dict_new}")
+                    # print(f"\n{check_dict_old}")
                     self.my_drow.write("someone changed the status_log !!!!!")
+                    self.my_drow.stop()
                     self.my_drow.write(checksum)
                     self.my_drow.write(str(total_checksum))
+                    return
+                else:
                     check_dict_new = {}
                     check_dict_old = {}
             elif flag:
