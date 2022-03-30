@@ -76,7 +76,7 @@ class MWinAlgo:
         lines = f.readlines()
         for line in lines:
             if line.split()[0] == "date:":
-                date = line.split()[1][:-1]
+                date = line
                 pass
             elif line.split()[0] == "new" or line.split()[0] == "services":
                 pass
