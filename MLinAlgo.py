@@ -18,6 +18,8 @@ class MLinAlgo:
         self.load_to_list()
         self.check_hacked()
         while (self.mon_run):
+            self.load_to_list()
+            self.check_hacked()
             self.compare_services()  # compare between services - prints to user, and write in status_log
             self.write_to_servicelist()  # write into serviceList the last sample of services according to date and checksum
             time.sleep(new_time)
@@ -42,11 +44,7 @@ class MLinAlgo:
                 elif line == ['date', 'checksum']:
                     if checksum != None:
                         if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                            # print(checksum)
-                            # print(self.check_sum(self.services_list[-1][1]))
-                            for process in self.services_list[-1][1].keys():
-                                print(f"{process},{self.services_list[-1][1][process]}")
-                            self.my_drow.write("someone change yuour files1111111 !!!!!!!!!!!!!!!!!!!!!!!!")
+                            self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
                             self.my_drow.stop()
                             return
                     flag_exist = True
@@ -55,7 +53,7 @@ class MLinAlgo:
 
             if checksum is not None:
                 if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                    self.my_drow.write("someone change yuour files !!!!!!!!!!!!!!!!!!!!!!!!")
+                    self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
                     self.my_drow.stop()
                     return
             self.mon_run = True
@@ -67,11 +65,12 @@ class MLinAlgo:
         check_dict_new = {}
         check_dict_old = {}
         flag = False
-
+        date = None
         f = open(".status_log.txt", 'r')
         lines = f.readlines()
         for line in lines:
             if line.split()[0] == "date:":
+                date = line
                 pass
             elif line.split()[0] == "new":
                 flag = True
@@ -85,7 +84,7 @@ class MLinAlgo:
                 comp_checksum2 = self.check_sum(check_dict_old)
                 total_checksum = comp_checksum1 + comp_checksum2
                 if checksum != str(total_checksum):
-                    self.my_drow.write("someone changed the status_log !!!!!")
+                    self.my_drow.throwalert(f"someone changed the status_log !!!!!\n {date}")
                     self.my_drow.stop()
                     return
                 else:
@@ -116,6 +115,7 @@ class MLinAlgo:
         for_checksum_new = {}
         for_checksum_old = {}
 
+        self.my_drow.write(f"{curr_time} :")
         if not self.services_list:
             f2 = open(".status_log.txt", "a")
             f2.write(f"date: {curr_time}\n")
@@ -138,8 +138,8 @@ class MLinAlgo:
                 if proc.name() not in last_service.values():
                     change = True
 
-            for curr_pid in curr_service.keys():
-                if curr_service[curr_pid] not in last_service.values():
+            for last_pid in last_service.keys():
+                if last_service[last_pid] not in curr_service.values():
                     change = True
 
             if not change:
@@ -227,6 +227,8 @@ class MLinAlgo:
             older = closest_to_t
             recent = closest_to_f
 
+        title = f"{recent} \ncompare to \n{older} :\n closest time to what was given original\n "
+
         recent_proc = {}
         older_proc = {}
         for tup in self.services_list:
@@ -234,15 +236,20 @@ class MLinAlgo:
                 recent_proc = tup[1]
             if str(tup[0]) == str(older):
                 older_proc = tup[1]
-
-        self.my_drow.write("new services:")
+        text = "new services: \n"
+        # self.my_drow.write("new services:")
         for pid in recent_proc:
             if pid not in older_proc or recent_proc[pid] not in older_proc.values():
-                self.my_drow.write(f"{pid} - {recent_proc[pid]}")
-        self.my_drow.write("old services:")
+                text +=f"{pid} - {recent_proc[pid]} \n"
+                # self.my_drow.write(f"{pid} - {recent_proc[pid]}")
+        # self.my_drow.write("old services:")
+        text += "old services: \n"
         for pid in older_proc:
             if pid not in recent_proc or older_proc[pid] not in recent_proc.values():
-                self.my_drow.write(f"{pid} - {older_proc[pid]}")
+                text += f"{pid} - {older_proc[pid]} \n"
+                # self.my_drow.write(f"{pid} - {older_proc[pid]}")
+        self.my_drow.writeIN_new_window(title,text)
+
 
     def find_nearest_date(self, check_date):
         date_list = []
@@ -262,10 +269,13 @@ class MLinAlgo:
         string_time = f"{date} {time}"
         date_object = datetime.fromisoformat(string_time)
         closest_to_date = self.find_nearest_date(date_object)
-
+        title = f"the servies from {closest_to_date}:\n we take the closest date for what asked\n"
         proc = {}
+        text = ""
         for tup in self.services_list:
             if str(tup[0]) == str(closest_to_date):
                 proc = tup[1]
         for pid in proc:
-            self.my_drow.write(f"{pid} - {proc[pid]}")
+            text+= f"{pid} - {proc[pid]}\n"
+            # self.my_drow.write(f"{pid} - {proc[pid]}")
+        self.my_drow.writeIN_new_window(title,text)
