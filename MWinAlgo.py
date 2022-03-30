@@ -5,6 +5,7 @@ import time
 import zlib
 from cryptography.fernet import Fernet
 import pythoncom
+import os
 
 
 class MWinAlgo:
@@ -64,6 +65,8 @@ class MWinAlgo:
                     self.my_drow.stop()
                     return
             self.mon_run = True
+        file.close()
+        os.system("attrib +h " + "serviceList.csv")
 
 
     def check_hacked(self):
@@ -94,6 +97,8 @@ class MWinAlgo:
                 pname = line.split(' - ')[1][:-1]
                 self.my_drow.write(f"pname is {str(pname)}")
                 check_dict[str(pid)] = str(pname)
+
+        os.system("attrib +h " + "status_log.txt")
 
 
 
@@ -128,6 +133,7 @@ class MWinAlgo:
             checksum = self.check_sum(for_checksum)
             f2.write(f"checksum: {checksum}\n")
             f2.close()
+            os.system("attrib +h " + "status_log.txt")
 
         else:
             last_service = self.services_list[-1][1]
@@ -163,6 +169,7 @@ class MWinAlgo:
                 checksum = self.check_sum(for_checksum)
                 f2.write(f"checksum: {checksum}\n")
                 f2.close()
+                os.system("attrib +h " + "status_log.txt")
             self.services_list.append((curr_time, curr_service))
 
 
@@ -202,6 +209,7 @@ class MWinAlgo:
             # print(f"{tup1[0]},{tup1[1]}")
 
         f.close()
+        os.system("attrib +h " + "serviceList.csv")
 
 
 

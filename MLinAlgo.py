@@ -15,19 +15,19 @@ class MLinAlgo:
     def start(self, refresh_time):
         self.my_drow.write("the program start to work")
         new_time = refresh_time.split(":")
-        new_time = ((int(new_time[0]) * 60) + int(new_time[1]))*60 + int(new_time[2])
+        new_time = ((int(new_time[0]) * 60) + int(new_time[1])) * 60 + int(new_time[2])
         self.load_to_list()
         self.check_hacked()
-        while(self.mon_run):
-            self.compare_services() # compare between services - prints to user, and write in status_log
-            self.write_to_servicelist() # write into serviceList the last sample of services according to date and checksum
+        while (self.mon_run):
+            self.compare_services()  # compare between services - prints to user, and write in status_log
+            self.write_to_servicelist()  # write into serviceList the last sample of services according to date and checksum
             time.sleep(new_time)
 
     def load_to_list(self):
-        f = open("serviceList.csv", 'a')
+        f = open(".serviceList.csv", 'a')
         f.close()
 
-        with open("serviceList.csv", 'r') as file:
+        with open(".serviceList.csv", 'r') as file:
             reader = csv.reader(file)
             flag_exist = False
             checksum = None
@@ -43,8 +43,8 @@ class MLinAlgo:
                 elif line == ['date', 'checksum']:
                     if checksum != None:
                         if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                            print(checksum)
-                            print(self.check_sum(self.services_list[-1][1]))
+                            # print(checksum)
+                            # print(self.check_sum(self.services_list[-1][1]))
                             for process in self.services_list[-1][1].keys():
                                 print(f"{process},{self.services_list[-1][1][process]}")
                             self.my_drow.write("someone change yuour files1111111 !!!!!!!!!!!!!!!!!!!!!!!!")
@@ -52,7 +52,7 @@ class MLinAlgo:
                             return
                     flag_exist = True
                 else:
-                    self.services_list[-1][1][int(line[0])]=line[1]
+                    self.services_list[-1][1][int(line[0])] = line[1]
 
             if checksum is not None:
                 if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
@@ -62,12 +62,12 @@ class MLinAlgo:
             self.mon_run = True
 
     def check_hacked(self):
-        f = open("status_log.txt", 'a')
+        f = open(".status_log.txt", 'a')
         f.close()
 
         check_dict = {}
 
-        f = open("status_log.txt", 'r')
+        f = open(".status_log.txt", 'r')
         lines = f.readlines()
         for line in lines:
             if line.split()[0] == "date:":
@@ -89,7 +89,7 @@ class MLinAlgo:
                 pname = line.split(' - ')[1][:-1]
                 self.my_drow.write(f"pname is {str(pname)}")
                 check_dict[str(pid)] = str(pname)
-            
+
     def check_sum(self, dict_to_encrypt):
         checksum = 0
         for pname in dict_to_encrypt.items():
@@ -99,7 +99,6 @@ class MLinAlgo:
             checksum = checksum ^ c1
         return checksum
 
-
     def compare_services(self):
         curr_time = datetime.now()
         curr_service = {}
@@ -107,14 +106,14 @@ class MLinAlgo:
         for_checksum = {}
 
         if not self.services_list:
-            f2 = open("status_log.txt", "a")
+            f2 = open(".status_log.txt", "a")
             f2.write(f"date: {curr_time}\n")
             self.my_drow.write("new services:")
             f2.write("new services:\n")
             for proc in psutil.process_iter():
                 curr_service[proc.pid] = str(proc.name())
                 self.my_drow.write(f"{proc.pid} {proc.name()}")
-                f2.write(f"{proc.pid} - {proc.name()}\n")
+                f2.write(f"{str(proc.pid)} - {str(proc.name())}\n")
                 for_checksum[str(proc.pid)] = str(proc.name())
             self.services_list.append((curr_time, curr_service))
             checksum = self.check_sum(for_checksum)
@@ -135,7 +134,7 @@ class MLinAlgo:
             if not change:
                 self.my_drow.write("nothing has changed!:")
             else:
-                f2 = open("status_log.txt", "a")
+                f2 = open(".status_log.txt", "a")
                 self.my_drow.write("new services:")
                 f2.write(f"date: {curr_time}\n")
                 f2.write("new services:\n")
@@ -156,50 +155,50 @@ class MLinAlgo:
                 f2.write(f"checksum: {checksum}\n")
                 f2.close()
             self.services_list.append((curr_time, curr_service))
-    
+
     def write_to_servicelist(self):
         # file look like :
         # date, checksum
         # actualdate, calc_checksum
         # pid, pname
-        #actual_pid, pname
+        # actual_pid, pname
 
         date = self.services_list[-1][0]
         last_service = self.services_list[-1][1]
         checksum = self.check_sum(last_service)
 
-        f = open("serviceList.csv", "a", newline="")
+        f = open(".serviceList.csv", "a", newline="")
         # f1 = open("serviceList_enc.csv", "a", newline="")
         writer = csv.writer(f)
         # writer1 = csv.writer(f1)
 
         tup1 = ("date", "checksum")
         writer.writerow(tup1)
-        print(tup1[0],tup1[1])
+        # print(tup1[0],tup1[1])
         # writer1 = csv.writer(tup1)
 
         tup1 = (date, checksum)
         writer.writerow(tup1)
-        print(tup1[0],tup1[1])
+        # print(tup1[0],tup1[1])
         # writer1 = csv.writer(tup1)
 
         tup1 = ("pid", "pname")
         writer.writerow(tup1)
-        print(tup1[0],tup1[1])
+        # print(tup1[0],tup1[1])
 
         for pid in last_service.keys():
             tup1 = (pid, last_service[pid])
             writer.writerow(tup1)
-            print(tup1[0],tup1[1])
+            # print(tup1[0],tup1[1])
 
-        f.close()    
+        f.close()
 
     def stop(self):
         self.my_drow.write("the program stop to work")
 
         self.mon_run = False
 
-    def comper(self, fdate, ftime , tdate, ttime):
+    def comper(self, fdate, ftime, tdate, ttime):
         self.load_to_list()
         stringf = f"{fdate} {ftime}"
         stringt = f"{tdate} {ttime}"
@@ -207,7 +206,6 @@ class MLinAlgo:
         tdate_object = datetime.fromisoformat(stringt)
         closest_to_f = self.find_nearest_date(fdate_object)
         closest_to_t = self.find_nearest_date(tdate_object)
-
 
         if closest_to_t.timestamp() - closest_to_f.timestamp() > 0:
             recent = closest_to_t
@@ -235,9 +233,7 @@ class MLinAlgo:
         for pid in older_proc:
             if pid not in recent_proc or older_proc[pid] not in recent_proc.values():
                 self.my_drow.write(f"{pid} - {older_proc[pid]}")
-                
-                
-                
+
     def find_nearest_date(self, check_date):
         date_list = []
         for i in range(0, len(self.services_list)):
@@ -246,5 +242,5 @@ class MLinAlgo:
         diff_date = {}
         # for date in date_list:
         #     diff_date[abs(check_date.timestamp() - date.timestamp())] = date
-        diff_date = {abs(check_date.timestamp()-date.timestamp()):date for date in date_list}
+        diff_date = {abs(check_date.timestamp() - date.timestamp()): date for date in date_list}
         return diff_date[min(diff_date.keys())]
