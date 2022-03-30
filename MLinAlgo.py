@@ -3,6 +3,8 @@ import csv
 import time
 import zlib
 import psutil
+from cryptography.fernet import Fernet
+
 
 
 class MLinAlgo:
@@ -10,6 +12,8 @@ class MLinAlgo:
         self.my_drow = mdrow
         self.mon_run = False
         self.services_list = []
+        self.key = b'qA-AS-LMaJcCMdeVMnBXIdAM6NFe5UeVEp322IlIeJI='
+        self.fernet = Fernet(self.key)
 
     def start(self, refresh_time):
         self.my_drow.write("the program start to work")
@@ -23,6 +27,7 @@ class MLinAlgo:
             self.compare_services()  # compare between services - prints to user, and write in status_log
             self.write_to_servicelist()  # write into serviceList the last sample of services according to date and checksum
             time.sleep(new_time)
+        self.my_drow.write("the program stop to work")
 
     def load_to_list(self):
         f = open(".serviceList.csv", 'a')
@@ -34,6 +39,8 @@ class MLinAlgo:
             checksum = None
             date = None
             for line in reader:
+                line[0] = self.fernet.decrypt(line[0].encode()).decode()
+                line[1] = self.fernet.decrypt(line[1].encode()).decode()
                 if line == ['pid', 'pname']:
                     pass
                 elif flag_exist:
@@ -168,6 +175,8 @@ class MLinAlgo:
                 f2.write(f"checksum: {str(total)}\n")
                 f2.close()
             self.services_list.append((curr_time, curr_service))
+            self.my_drow.write("--------------------------------")
+
 
     def write_to_servicelist(self):
         # file look like :
@@ -184,30 +193,30 @@ class MLinAlgo:
         # f1 = open("serviceList_enc.csv", "a", newline="")
         writer = csv.writer(f)
         # writer1 = csv.writer(f1)
-
-        tup1 = ("date", "checksum")
+        tup1 = ((self.fernet.encrypt("date".encode())).decode(), (self.fernet.encrypt("checksum".encode())).decode())
+        # tup1 = ("date", "checksum")
         writer.writerow(tup1)
         # print(tup1[0],tup1[1])
         # writer1 = csv.writer(tup1)
-
-        tup1 = (date, checksum)
+        tup1 = ((self.fernet.encrypt(str(date).encode())).decode(), (self.fernet.encrypt(str(checksum).encode())).decode())
+        # tup1 = (date, checksum)
         writer.writerow(tup1)
         # print(tup1[0],tup1[1])
         # writer1 = csv.writer(tup1)
-
-        tup1 = ("pid", "pname")
+        tup1 = ((self.fernet.encrypt("pid".encode()).decode()), (self.fernet.encrypt("pname".encode())).decode())
+        # tup1 = ("pid", "pname")
         writer.writerow(tup1)
         # print(tup1[0],tup1[1])
 
         for pid in last_service.keys():
-            tup1 = (pid, last_service[pid])
+            tup1 = ((self.fernet.encrypt(str(pid).encode()).decode()), (self.fernet.encrypt(str(last_service[pid]).encode())).decode())
+            # tup1 = (pid, last_service[pid])
             writer.writerow(tup1)
             # print(tup1[0],tup1[1])
 
         f.close()
 
     def stop(self):
-        self.my_drow.write("the program stop to work")
 
         self.mon_run = False
 
