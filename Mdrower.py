@@ -63,7 +63,7 @@ class Mdrower:
         wm.mainloop()
 
     def writeIN_new_window(self, title_h, write_content):
-        thread = threading.Thread(target=self.throwalerthred, args=(title_h, write_content,))
+        thread = threading.Thread(target=self.writeIN_new_window_thred, args=(title_h, write_content,))
         thread.start()
 
     def writeIN_new_window_thred(self, title_h, write_content):
@@ -71,8 +71,18 @@ class Mdrower:
         wm.title("service monitor 2.0")
         titel_label = Label(wm, text=title_h, fg="black", font="none 12 bold")
         titel_label.grid(row=0, column=0, sticky=W)
-        error_label = Label(wm, text=write_content, fg="black", font="none 12 bold")
-        error_label.grid(row=1, column=0, sticky=W)
+        frame_t = Frame(wm)
+
+        scroller_t = Scrollbar(frame_t)
+        scroller_t.pack(side=RIGHT, fill=Y)
+
+        output_t = Text(frame_t, yscrollcommand=scroller_t.set, wrap="none", background="gray")
+        output_t.insert(END,write_content+"\n")
+        output_t.pack(expand=True, side=LEFT)
+
+        scroller_t.config(command=output_t.yview)
+
+        frame_t.grid(row=10, column=0, columnspan=4, sticky=W)
         wm.mainloop()
 
     def start(self):

@@ -47,7 +47,7 @@ class MWinAlgo:
                 elif line == ['date', 'checksum']:
                     if checksum != None:
                         if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                            self.my_drow.write("someone change yuour files1111111 !!!!!!!!!!!!!!!!!!!!!!!!")
+                            self.my_drow.throwalert("someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!")
                             self.my_drow.stop()
                             return
                     flag_exist = True
@@ -56,7 +56,7 @@ class MWinAlgo:
 
             if checksum is not None:
                 if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                    self.my_drow.write("someone change yuour files !!!!!!!!!!!!!!!!!!!!!!!!")
+                    self.my_drow.throwalert("someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!")
                     self.my_drow.stop()
                     return
             self.mon_run = True
@@ -81,7 +81,7 @@ class MWinAlgo:
                 checksum = str(line.split()[1])
                 comp_checksum = self.check_sum(check_dict)
                 if checksum != str(comp_checksum):
-                    self.my_drow.write("someone changed the status_log !!!!!")
+                    self.my_drow.throwalert("someone changed the status_log !!!!!")
                     self.my_drow.stop()
                     return
                 else:
@@ -112,6 +112,7 @@ class MWinAlgo:
         change = False
         for_checksum = {}
 
+        self.my_drow.write(f"{curr_time} :")
         if not self.services_list:
             f2 = open("status_log.txt", "a")
             f2.write(f"date: {curr_time}\n")
@@ -135,8 +136,8 @@ class MWinAlgo:
                 if process.Name not in last_service.values():
                     change = True
 
-            for curr_pid in curr_service.keys():
-                if curr_service[curr_pid] not in last_service.values():
+            for last_pid in last_service.keys():
+                if last_service[last_pid] not in curr_service.values():
                     change = True
 
             if not change:
@@ -164,6 +165,8 @@ class MWinAlgo:
                 f2.close()
                 os.system("attrib +h " + "status_log.txt")
             self.services_list.append((curr_time, curr_service))
+
+            self.my_drow.write("--------------------------------")
 
 
     def write_to_servicelist(self):
@@ -222,13 +225,14 @@ class MWinAlgo:
         closest_to_f = self.find_nearest_date(fdate_object)
         closest_to_t = self.find_nearest_date(tdate_object)
 
-
         if closest_to_t.timestamp() - closest_to_f.timestamp() > 0:
             recent = closest_to_t
             older = closest_to_f
         else:
             older = closest_to_t
             recent = closest_to_f
+
+        title = f"{recent} \ncompare to \n{older} :\n closest time to what was given original\n "
 
         recent_proc = {}
         older_proc = {}
@@ -237,15 +241,19 @@ class MWinAlgo:
                 recent_proc = tup[1]
             if str(tup[0]) == str(older):
                 older_proc = tup[1]
-
-        self.my_drow.write("new services:")
+        text = "new services: \n"
+        #self.my_drow.write("new services:")
         for pid in recent_proc:
             if pid not in older_proc or recent_proc[pid] not in older_proc.values():
-                self.my_drow.write(f"{pid} - {recent_proc[pid]}")
-        self.my_drow.write("old services:")
+                text +=f"{pid} - {recent_proc[pid]} \n"
+                #self.my_drow.write(f"{pid} - {recent_proc[pid]}")
+        #self.my_drow.write("old services:")
+        text += "old services: \n"
         for pid in older_proc:
             if pid not in recent_proc or older_proc[pid] not in recent_proc.values():
-                self.my_drow.write(f"{pid} - {older_proc[pid]}")
+                text += f"{pid} - {older_proc[pid]} \n"
+                #self.my_drow.write(f"{pid} - {older_proc[pid]}")
+        self.my_drow.writeIN_new_window(title,text)
 
 
 
@@ -266,13 +274,16 @@ class MWinAlgo:
         string_time = f"{date} {time}"
         date_object = datetime.fromisoformat(string_time)
         closest_to_date = self.find_nearest_date(date_object)
-
+        title = f"the servies from {closest_to_date}:\n we take the closest date for what asked\n"
         proc = {}
+        text = ""
         for tup in self.services_list:
             if str(tup[0]) == str(closest_to_date):
                 proc = tup[1]
         for pid in proc:
-            self.my_drow.write(f"{pid} - {proc[pid]}")
+            text+= f"{pid} - {proc[pid]}\n"
+            #self.my_drow.write(f"{pid} - {proc[pid]}")
+        self.my_drow.writeIN_new_window(title,text)
 
 
 
