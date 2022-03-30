@@ -94,17 +94,17 @@ class Mdrower:
     def comper(self):
         fdate = self.from_comper_input['date'].get()
         self.from_comper_input['date'].delete(0, END)
-        self.from_comper_input['date'].insert(0,"XXXX-XX-XX")
+        self.from_comper_input['date'].insert(0,"yyyy-mm-dd")
         ftime = self.from_comper_input['time'].get()
         self.from_comper_input['time'].delete(0, END)
-        self.from_comper_input['time'].insert(0,"XX:XX:XX")
+        self.from_comper_input['time'].insert(0,"hh:mm:ss")
 
         tdate = self.to_comper_input['date'].get()
         self.to_comper_input['date'].delete(0, END)
-        self.to_comper_input['date'].insert(0,"XXXX-XX-XX")
+        self.to_comper_input['date'].insert(0,"yyyy-mm-dd")
         ttime = self.to_comper_input['time'].get()
         self.to_comper_input['time'].delete(0, END)
-        self.to_comper_input['time'].insert(0,"XX:XX:XX")
+        self.to_comper_input['time'].insert(0,"hh:mm:ss")
         if (len(ttime.split(':')) == 3) and (len(tdate.split('-')) == 3) and (len(ftime.split(':')) == 3) and (len(fdate.split('-')) == 3):
             self.algoM.comper(fdate,ftime,tdate,ttime)
         else:
@@ -113,10 +113,10 @@ class Mdrower:
     def servies_by_dateandtime(self):
         gdate = self.get_servies_input['date'].get()
         self.get_servies_input['date'].delete(0, END)
-        self.get_servies_input['date'].insert(0, "XXXX-XX-XX")
+        self.get_servies_input['date'].insert(0, "yyyy-mm-dd")
         gtime = self.get_servies_input['time'].get()
         self.get_servies_input['time'].delete(0, END)
-        self.get_servies_input['time'].insert(0, "XX:XX:XX")
+        self.get_servies_input['time'].insert(0, "hh:mm:ss")
         if (len(gtime.split(':')) == 3) and (len(gdate.split('-')) == 3):
             self.algoM.get_sample(gdate,gtime)
         else:
@@ -228,11 +228,15 @@ class Mdrower:
         self.refresh_input.grid(row=1, column=1, sticky=W)
 
         self.frame = Frame(self.window)
-        self.output = Text(self.frame, wrap=WORD, background="gray")
-        self.output.pack(expand=True, side=LEFT)
 
         scroller = Scrollbar(self.frame)
-        scroller.pack(side=RIGHT, fill = BOTH)
+        scroller.pack(side=RIGHT, fill=Y)
+        
+        self.output = Text(self.frame,yscrollcommand = scroller.set, wrap="none", background="gray" )
+        self.output.pack(expand=True, side=LEFT)
+
+        scroller.config(command = self.output.yview)
+
 
         self.frame.grid(row=10, column=0, columnspan=4, sticky=W)
 
