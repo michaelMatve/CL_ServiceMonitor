@@ -117,7 +117,8 @@ class Mdrower:
         self.to_comper_input['time'].delete(0, END)
         self.to_comper_input['time'].insert(0,"hh:mm:ss")
         if (len(ttime.split(':')) == 3) and (len(tdate.split('-')) == 3) and (len(ftime.split(':')) == 3) and (len(fdate.split('-')) == 3):
-            self.algoM.comper(fdate,ftime,tdate,ttime)
+            thread = threading.Thread(target=self.algoM.comper, args=(fdate,ftime,tdate,ttime,))
+            thread.start()
         else:
             self.throwalert("bad insert. \n time should be: hh:mm:ss \n and date should be: yyyy-mm-dd")
 
@@ -129,7 +130,8 @@ class Mdrower:
         self.get_servies_input['time'].delete(0, END)
         self.get_servies_input['time'].insert(0, "hh:mm:ss")
         if (len(gtime.split(':')) == 3) and (len(gdate.split('-')) == 3):
-            self.algoM.get_sample(gdate,gtime)
+            thread = threading.Thread(target=self.algoM.get_sample, args=(gdate,gtime,))
+            thread.start()
         else:
             self.throwalert("bad insert. \n time should be: hh:mm:ss \n and date should be: yyyy-mm-dd")
 

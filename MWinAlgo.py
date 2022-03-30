@@ -4,6 +4,7 @@ import csv
 import time
 import zlib
 import pythoncom
+from cryptography.fernet import Fernet
 import os
 
 
@@ -12,6 +13,8 @@ class MWinAlgo:
         self.my_drow = mdrow
         self.mon_run = False
         self.services_list = [] # [(date, {pid : pname})]
+        self.key = b'qA-AS-LMaJcCMdeVMnBXIdAM6NFe5UeVEp322IlIeJI='
+        self.fernet = Fernet(self.key)
         # list for all the servies< (time : dict<pid : name )>>
 
     def start(self, refresh_time):
@@ -34,34 +37,44 @@ class MWinAlgo:
         f.close()
 
         with open("serviceList.csv", 'r') as file:
-            reader = csv.reader(file)
-            flag_exist = False
-            checksum = None
-            date = None
-            for line in reader:
-                if line == ['pid', 'pname']:
-                    pass
-                elif flag_exist:
-                    date = line[0]
-                    checksum = line[1]
-                    self.services_list.append((date, {}))
-                    flag_exist = False
-                elif line == ['date', 'checksum']:
-                    if checksum != None:
-                        if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                            self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
-                            self.my_drow.stop()
-                            return
-                    flag_exist = True
-                else:
-                    self.services_list[-1][1][int(line[0])]=line[1]
+            try:
+                new_temp_list = []
+                reader = csv.reader(file)
+                flag_exist = False
+                checksum = None
+                date = None
+                for line in reader:
+                    line[0] = self.fernet.decrypt(line[0].encode()).decode()
+                    line[1] = self.fernet.decrypt(line[1].encode()).decode()
+                    if line == ['pid', 'pname']:
+                        pass
+                    elif flag_exist:
+                        date = line[0]
+                        checksum = line[1]
+                        new_temp_list.append((date, {}))
+                        flag_exist = False
+                    elif line == ['date', 'checksum']:
+                        if checksum != None:
+                            if int(self.check_sum(new_temp_list[-1][1])) != int(checksum):
+                                self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
+                                self.my_drow.stop()
+                                return
+                        flag_exist = True
+                    else:
+                        new_temp_list[-1][1][int(line[0])]=line[1]
 
-            if checksum is not None:
-                if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                    self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
-                    self.my_drow.stop()
-                    return
-            self.mon_run = True
+                if checksum is not None:
+                    if int(self.check_sum(new_temp_list[-1][1])) != int(checksum):
+                        self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
+                        self.my_drow.stop()
+                        return
+                self.services_list = new_temp_list
+                self.mon_run = True
+            except:
+                print("1")
+                self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!")
+                self.my_drow.stop()
+                return
         file.close()
         os.system("attrib +h " + "serviceList.csv")
 
@@ -186,23 +199,24 @@ class MWinAlgo:
         # f1 = open("serviceList_enc.csv", "a", newline="")
         writer = csv.writer(f)
         # writer1 = csv.writer(f1)
-
-        tup1 = ("date", "checksum")
+        tup1 = ((self.fernet.encrypt("date".encode())).decode(), (self.fernet.encrypt("checksum".encode())).decode())
+        #tup1 = ("date", "checksum")
         writer.writerow(tup1)
         # print(f"{tup1[0]},{tup1[1]}")
         # writer1 = csv.writer(tup1)
-
-        tup1 = (date, checksum)
+        tup1 = ((self.fernet.encrypt(str(date).encode())).decode(), (self.fernet.encrypt(str(checksum).encode())).decode())
+        #tup1 = (date, checksum)
         writer.writerow(tup1)
         # print(f"{tup1[0]},{tup1[1]}")
         # writer1 = csv.writer(tup1)
-
-        tup1 = ("pid", "pname")
+        tup1 = ((self.fernet.encrypt("pid".encode()).decode()), (self.fernet.encrypt("pname".encode())).decode())
+        #tup1 = ("pid", "pname")
         writer.writerow(tup1)
         # print(f"{tup1[0]},{tup1[1]}")
 
         for pid in last_service.keys():
-            tup1 = (pid, last_service[pid])
+            tup1 = ((self.fernet.encrypt(str(pid).encode()).decode()), (self.fernet.encrypt(str(last_service[pid]).encode())).decode())
+            #tup1 = (pid, last_service[pid])
             writer.writerow(tup1)
             # print(f"{tup1[0]},{tup1[1]}")
 
