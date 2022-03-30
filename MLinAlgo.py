@@ -2,7 +2,6 @@ from datetime import datetime
 import csv
 import time
 import zlib
-from cryptography.fernet import Fernet
 import psutil
 
 
