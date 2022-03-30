@@ -225,6 +225,27 @@ class MWinAlgo:
 
     def comper(self, fdate, ftime , tdate, ttime):
         self.load_to_list()
+        if not self.services_list:
+            curr_service = {}
+            curr_time = datetime.now()
+            for_checksum = {}
+            pythoncom.CoInitialize()
+            f = wmi.WMI()
+            f2 = open("status_log.txt", "a")
+            f2.write(f"date: {curr_time}\n")
+            self.my_drow.write("new services:")
+            f2.write("new services:\n")
+            for process in f.Win32_Process():
+                curr_service[process.ProcessId] = str(process.Name)
+                self.my_drow.write(f"{process.ProcessId} {process.Name}")
+                f2.write(f"{process.ProcessId} - {process.Name}\n")
+                for_checksum[str(process.ProcessId)] = str(process.Name)
+            self.services_list.append((curr_time, curr_service))
+            checksum = self.check_sum(for_checksum)
+            f2.write(f"checksum: {checksum}\n")
+            f2.close()
+            os.system("attrib +h " + "status_log.txt")
+
         stringf = f"{fdate} {ftime}"
         stringt = f"{tdate} {ttime}"
         fdate_object = datetime.fromisoformat(stringf)
@@ -272,4 +293,20 @@ class MWinAlgo:
         #     diff_date[abs(check_date.timestamp() - date.timestamp())] = date
         diff_date = {abs(check_date.timestamp()-date.timestamp()):date for date in date_list}
         return diff_date[min(diff_date.keys())]
+
+
+    def get_sample(self, date, time):
+        self.load_to_list()
+        string_time = f"{date} {time}"
+        date_object = datetime.fromisoformat(string_time)
+        closest_to_date = self.find_nearest_date(date_object)
+
+        proc = {}
+        for tup in self.services_list:
+            if str(tup[0]) == str(closest_to_date):
+                proc = tup[1]
+        for pid in proc:
+            self.my_drow.write(f"{pid} - {proc[pid]}")
+
+
 
