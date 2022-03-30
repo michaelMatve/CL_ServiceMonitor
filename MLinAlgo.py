@@ -65,30 +65,46 @@ class MLinAlgo:
         f = open(".status_log.txt", 'a')
         f.close()
 
-        check_dict = {}
+        check_dict_new = {}
+        check_dict_old = {}
+        flag = False
 
         f = open(".status_log.txt", 'r')
         lines = f.readlines()
         for line in lines:
             if line.split()[0] == "date:":
                 pass
-            elif line.split()[0] == "new" or line.split()[0] == "services":
+            elif line.split()[0] == "new":
+                flag = True
+                pass
+            elif line.split()[0] == "services":
+                flag = False
                 pass
             elif line.split()[0] == "checksum:":
                 checksum = str(line.split()[1])
-                comp_checksum = self.check_sum(check_dict)
-                if checksum != str(comp_checksum):
-                    print(check_dict)
+                comp_checksum1 = self.check_sum(check_dict_new)
+                comp_checksum2 = self.check_sum(check_dict_old)
+                total_checksum = comp_checksum1 + comp_checksum2
+                if checksum != str(total_checksum):
+                    print(f"\n{check_dict_new}")
+                    print(f"\n{check_dict_new}")
                     self.my_drow.write("someone changed the status_log !!!!!")
                     self.my_drow.write(checksum)
-                    self.my_drow.write(str(comp_checksum))
-                    check_dict = {}
-            else:
+                    self.my_drow.write(str(total_checksum))
+                    check_dict_new = {}
+                    check_dict_old = {}
+            elif flag:
                 pid = line.split(' - ')[0]
-                self.my_drow.write(f"pid is {str(pid)}")
+                # self.my_drow.write(f"pid is {str(pid)}")
                 pname = line.split(' - ')[1][:-1]
-                self.my_drow.write(f"pname is {str(pname)}")
-                check_dict[str(pid)] = str(pname)
+                # self.my_drow.write(f"pname is {str(pname)}")
+                check_dict_new[str(pid)] = str(pname)
+            elif not flag:
+                pid = line.split(' - ')[0]
+                # self.my_drow.write(f"pid is {str(pid)}")
+                pname = line.split(' - ')[1][:-1]
+                # self.my_drow.write(f"pname is {str(pname)}")
+                check_dict_old[str(pid)] = str(pname)
 
     def check_sum(self, dict_to_encrypt):
         checksum = 0
@@ -103,7 +119,8 @@ class MLinAlgo:
         curr_time = datetime.now()
         curr_service = {}
         change = False
-        for_checksum = {}
+        for_checksum_new = {}
+        for_checksum_old = {}
 
         if not self.services_list:
             f2 = open(".status_log.txt", "a")
@@ -114,9 +131,9 @@ class MLinAlgo:
                 curr_service[proc.pid] = str(proc.name())
                 self.my_drow.write(f"{proc.pid} {proc.name()}")
                 f2.write(f"{str(proc.pid)} - {str(proc.name())}\n")
-                for_checksum[str(proc.pid)] = str(proc.name())
+                for_checksum_new[str(proc.pid)] = str(proc.name())
             self.services_list.append((curr_time, curr_service))
-            checksum = self.check_sum(for_checksum)
+            checksum = self.check_sum(for_checksum_new)
             f2.write(f"checksum: {checksum}\n")
             f2.close()
 
@@ -142,7 +159,7 @@ class MLinAlgo:
                     if curr_service[curr_pid] not in last_service.values():
                         self.my_drow.write(f"{curr_pid} - {curr_service[curr_pid]}")
                         f2.write(f"{curr_pid} - {curr_service[curr_pid]}\n")
-                        for_checksum[str(curr_pid)] = str(curr_service[curr_pid])
+                        for_checksum_new[str(curr_pid)] = str(curr_service[curr_pid])
 
                 self.my_drow.write("services no longer run:")
                 f2.write("services no longer run:\n")
@@ -150,9 +167,11 @@ class MLinAlgo:
                     if last_service[last_pid] not in curr_service.values():
                         self.my_drow.write(f"{last_pid} - {last_service[last_pid]}")
                         f2.write(f"{last_pid} - {last_service[last_pid]}\n")
-                        for_checksum[str(last_pid)] = str(last_service[last_pid])
-                checksum = self.check_sum(for_checksum)
-                f2.write(f"checksum: {checksum}\n")
+                        for_checksum_old[str(last_pid)] = str(last_service[last_pid])
+                checksum = self.check_sum(for_checksum_new)
+                checksum2 = self.check_sum(for_checksum_old)
+                total = int(checksum) + int(checksum2)
+                f2.write(f"checksum: {str(total)}\n")
                 f2.close()
             self.services_list.append((curr_time, curr_service))
 
