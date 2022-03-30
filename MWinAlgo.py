@@ -21,6 +21,8 @@ class MWinAlgo:
         self.load_to_list()
         self.check_hacked()
         while(self.mon_run):
+            self.load_to_list()
+            self.check_hacked()
             self.compare_services() # compare between services - prints to user, and write in status_log
             self.write_to_servicelist() # write into serviceList the last sample of services according to date and checksum
             time.sleep(new_time)
@@ -47,7 +49,7 @@ class MWinAlgo:
                 elif line == ['date', 'checksum']:
                     if checksum != None:
                         if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                            self.my_drow.throwalert("someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!")
+                            self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
                             self.my_drow.stop()
                             return
                     flag_exist = True
@@ -56,7 +58,7 @@ class MWinAlgo:
 
             if checksum is not None:
                 if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                    self.my_drow.throwalert("someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!")
+                    self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
                     self.my_drow.stop()
                     return
             self.mon_run = True
@@ -69,11 +71,12 @@ class MWinAlgo:
         f.close()
 
         check_dict = {}
-
+        date =None
         f = open("status_log.txt", 'r')
         lines = f.readlines()
         for line in lines:
             if line.split()[0] == "date:":
+                date = line.split()[1][:-1]
                 pass
             elif line.split()[0] == "new" or line.split()[0] == "services":
                 pass
@@ -81,7 +84,7 @@ class MWinAlgo:
                 checksum = str(line.split()[1])
                 comp_checksum = self.check_sum(check_dict)
                 if checksum != str(comp_checksum):
-                    self.my_drow.throwalert("someone changed the status_log !!!!!")
+                    self.my_drow.throwalert(f"someone changed the status_log !!!!!\n {date}")
                     self.my_drow.stop()
                     return
                 else:
@@ -92,7 +95,6 @@ class MWinAlgo:
                 check_dict[str(pid)] = str(pname)
 
         os.system("attrib +h " + "status_log.txt")
-
 
 
     def check_sum(self, dict_to_encrypt):
