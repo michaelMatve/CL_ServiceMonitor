@@ -83,6 +83,7 @@ class Mdrower:
             thread.start()
             self.refresh_input.destroy()
             self.draw_start()
+            self.output.delete("0.0",END)
 
         else:
             self.throwalert("bad time insert. \n should be: hh:mm:ss")
