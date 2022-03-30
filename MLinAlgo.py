@@ -34,36 +34,45 @@ class MLinAlgo:
         f.close()
 
         with open(".serviceList.csv", 'r') as file:
-            reader = csv.reader(file)
-            flag_exist = False
-            checksum = None
-            date = None
-            for line in reader:
-                line[0] = self.fernet.decrypt(line[0].encode()).decode()
-                line[1] = self.fernet.decrypt(line[1].encode()).decode()
-                if line == ['pid', 'pname']:
-                    pass
-                elif flag_exist:
-                    date = line[0]
-                    checksum = line[1]
-                    self.services_list.append((date, {}))
-                    flag_exist = False
-                elif line == ['date', 'checksum']:
-                    if checksum != None:
-                        if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                            self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
-                            self.my_drow.stop()
-                            return
-                    flag_exist = True
-                else:
-                    self.services_list[-1][1][int(line[0])] = line[1]
-
-            if checksum is not None:
-                if int(self.check_sum(self.services_list[-1][1])) != int(checksum):
-                    self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
-                    self.my_drow.stop()
-                    return
-            self.mon_run = True
+            try:
+                reader = csv.reader(file)
+                flag_exist = False
+                checksum = None
+                date = None
+                temp_srvies_list = []
+                for line in reader:
+                    line[0] = self.fernet.decrypt(line[0].encode()).decode()
+                    line[1] = self.fernet.decrypt(line[1].encode()).decode()
+                    if line == ['pid', 'pname']:
+                        pass
+                    elif flag_exist:
+                        date = line[0]
+                        checksum = line[1]
+                        temp_srvies_list.append((date, {}))
+                        flag_exist = False
+                    elif line == ['date', 'checksum']:
+                        if checksum != None:
+                            if int(self.check_sum(temp_srvies_list[-1][1])) != int(checksum):
+                                self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
+                                self.my_drow.stop()
+                                return
+                        flag_exist = True
+                    else:
+                        temp_srvies_list[-1][1][int(line[0])] = line[1]
+    
+                if checksum is not None:
+                    if int(self.check_sum(temp_srvies_list[-1][1])) != int(checksum):
+                        self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!\n in date: {date}")
+                        self.my_drow.stop()
+                        return
+                self.services_list = temp_srvies_list
+                self.mon_run = True
+            except:
+                print("1")
+                self.my_drow.throwalert(f"someone change servies_file !!!!!!!!!!!!!!!!!!!!!!!!")
+                self.my_drow.stop()
+                return   
+        file.close()
 
     def check_hacked(self):
         f = open(".status_log.txt", 'a')
