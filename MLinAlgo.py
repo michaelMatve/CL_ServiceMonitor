@@ -86,29 +86,19 @@ class MLinAlgo:
                 comp_checksum2 = self.check_sum(check_dict_old)
                 total_checksum = comp_checksum1 + comp_checksum2
                 if checksum != str(total_checksum):
-                    print(f"{checksum}")
-                    print(f"{total_checksum}")
-                    # print(f"\n{check_dict_new}")
-                    # print(f"\n{check_dict_old}")
                     self.my_drow.write("someone changed the status_log !!!!!")
                     self.my_drow.stop()
-                    self.my_drow.write(checksum)
-                    self.my_drow.write(str(total_checksum))
                     return
                 else:
                     check_dict_new = {}
                     check_dict_old = {}
             elif flag:
                 pid = line.split(' - ')[0]
-                # self.my_drow.write(f"pid is {str(pid)}")
                 pname = line.split(' - ')[1][:-1]
-                # self.my_drow.write(f"pname is {str(pname)}")
                 check_dict_new[str(pid)] = str(pname)
             elif not flag:
                 pid = line.split(' - ')[0]
-                # self.my_drow.write(f"pid is {str(pid)}")
                 pname = line.split(' - ')[1][:-1]
-                # self.my_drow.write(f"pname is {str(pname)}")
                 check_dict_old[str(pid)] = str(pname)
 
     def check_sum(self, dict_to_encrypt):
@@ -238,9 +228,6 @@ class MLinAlgo:
             older = closest_to_t
             recent = closest_to_f
 
-        self.my_drow.write(f"{recent}")
-        self.my_drow.write(f"{older}")
-
         recent_proc = {}
         older_proc = {}
         for tup in self.services_list:
@@ -268,3 +255,18 @@ class MLinAlgo:
         #     diff_date[abs(check_date.timestamp() - date.timestamp())] = date
         diff_date = {abs(check_date.timestamp() - date.timestamp()): date for date in date_list}
         return diff_date[min(diff_date.keys())]
+    
+    
+    
+    def get_sample(self, date, time):
+        self.load_to_list()
+        string_time = f"{date} {time}"
+        date_object = datetime.fromisoformat(string_time)
+        closest_to_date = self.find_nearest_date(date_object)
+
+        proc = {}
+        for tup in self.services_list:
+            if str(tup[0]) == str(closest_to_date):
+                proc = tup[1]
+        for pid in proc:
+            self.my_drow.write(f"{pid} - {proc[pid]}")
