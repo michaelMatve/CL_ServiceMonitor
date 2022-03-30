@@ -29,6 +29,7 @@ class MWinAlgo:
             self.compare_services() # compare between services - prints to user, and write in status_log
             self.write_to_servicelist() # write into serviceList the last sample of services according to date and checksum
             time.sleep(new_time)
+        self.my_drow.write("the program stop to work")
 
 
 
@@ -38,11 +39,11 @@ class MWinAlgo:
 
         with open("serviceList.csv", 'r') as file:
             try:
-                new_temp_list = []
                 reader = csv.reader(file)
                 flag_exist = False
                 checksum = None
                 date = None
+                new_temp_list = []
                 for line in reader:
                     line[0] = self.fernet.decrypt(line[0].encode()).decode()
                     line[1] = self.fernet.decrypt(line[1].encode()).decode()
@@ -226,8 +227,6 @@ class MWinAlgo:
 
 
     def stop(self):
-        self.my_drow.write("the program stop to work")
-
         self.mon_run = False
 
 
